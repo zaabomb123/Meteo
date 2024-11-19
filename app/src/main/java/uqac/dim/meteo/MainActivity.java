@@ -1,9 +1,7 @@
 package uqac.dim.meteo;
-
-
-
-import android.os.AsyncTask;
 import android.os.Bundle;
+
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -13,15 +11,12 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import com.google.gson.JsonObject;
+import com.koushikdutta.async.future.FutureCallback;
+import com.koushikdutta.ion.Ion;
 
 public class MainActivity extends AppCompatActivity {
-
+private static final String API_KEY = "74b67fd8bca533ff5d9400a4b3c02720";
     private EditText etCityName;
     private Button btnSearch;
     private ImageView iconWeather;
@@ -51,69 +46,37 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(MainActivity.this, "Please enter a city name", Toast.LENGTH_SHORT).show();
                 } else {
                     // Charger la météo
-                    new FetchWeatherTask().execute(city);
+                    loadWeatherByCityName(city);
                 }
             }
         });
     }
 
+    private void loadWeatherByCityName(String city) {
+
+        Ion.with(this)
+                .load("http://api.openweathermap.org/data/2.5/weather?q=" + city + "&&units=metric&appid=" + API_KEY)
+                .asJsonObject()
+                .setCallback(new FutureCallback<JsonObject>() {
+                    @Override
+                    public void onCompleted(Exception e, JsonObject result) {
+                        // do stuff with the result or error
+
+
+
+                    }
+                });
+
+
+
+
+
     // Classe interne pour exécuter la requête HTTP en arrière-plan
-    private class FetchWeatherTask extends AsyncTask<String, Void, String> {
-        private static final String API_KEY = "VOTRE_CLE_API";
-        private static final String API_URL = "https://api.openweathermap.org/data/2.5/weather";
 
-        @Override
-        protected String doInBackground(String... params) {
-            String cityName = params[0];
-            String urlString = API_URL + "?q=" + cityName + "&appid=" + API_KEY + "&units=metric";
-            try {
-                URL url = new URL(urlString);
-                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                connection.setRequestMethod("GET");
-                connection.setReadTimeout(10000);
-                connection.setConnectTimeout(15000);
-                connection.connect();
 
-                BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                StringBuilder result = new StringBuilder();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    result.append(line);
-                }
-                reader.close();
-                return result.toString();
-            } catch (Exception e) {
-                e.printStackTrace();
-                return null;
-            }
-        }
 
-        @Override
-        protected void onPostExecute(String result) {
-            super.onPostExecute(result);
-            if (result != null) {
-                try {
-                    // Parsing du JSON
-                    JSONObject jsonObject = new JSONObject(result);
-                    JSONObject main = jsonObject.getJSONObject("main");
-                    double temp = main.getDouble("temp");
-                    String cityName = jsonObject.getString("name");
 
-                    // Mise à jour des TextViews
-                    tvTemp.setText(String.format("%.1f°C", temp));
-                    tvCity.setText(cityName);
 
-                    // (Facultatif) Mettre à jour une icône météo selon le code reçu
-                    // int weatherCode = jsonObject.getJSONArray("weather").getJSONObject(0).getInt("id");
-                    // Utilisez weatherCode pour changer l'icône de iconWeather
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    Toast.makeText(MainActivity.this, "Error parsing weather data", Toast.LENGTH_SHORT).show();
-                }
-            } else {
-                Toast.makeText(MainActivity.this, "Failed to fetch weather data", Toast.LENGTH_SHORT).show();
-            }
-        }
     }
+
 }

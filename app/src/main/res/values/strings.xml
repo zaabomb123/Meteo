@@ -1,4 +1,9 @@
 <resources>
     <string name="app_name">Meteo</string>
-    <string name="city_name">City Name</string>
+    <string name="search">Search</string>
+    <string name="city_name">Enter city name</string>
+    <string name="weather_icon_description">Weather Icon</string>
+    <string name="temperature_sample">20°C</string>
+    <string name="city_sample">Quebec, CA</string>
+
 </resources>
